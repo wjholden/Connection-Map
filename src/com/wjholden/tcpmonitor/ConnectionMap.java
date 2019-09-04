@@ -10,9 +10,13 @@ import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +48,54 @@ public final class ConnectionMap {
     private final Thread syslogMulticastThread, syslogUnicastThread;
     private final Thread parseThread;
     private final Map<Map.Entry<Integer,Integer>, Integer> map;
+    
+    /**
+     * See https://twitter.com/wjholdentech/status/1169124304501563394.
+     * 
+     * You can find the original "bw.jpeg" file that I started with in the project
+     * resources. Here are the Julia commands I used to generate these files:
+     * 
+     * <pre>
+     * {@code
+     * using FileIO,Images,StatsBase
+     * 
+     * # Start with a 720x360 grayscale equirectangular world map (white = water)
+     * bw = load("bw.jpeg")
+     * 
+     * # Verify that it fits in 720x360
+     * size(bw)
+     * 
+     * # Observe that we do not have the true black/white pixels we expected
+     * countmap(bw)
+     * 
+     * # The pixels are grayscale, with values between 0 and 1. Round them off.
+     * bw_rounded = round.(bw)
+     * countmap(bw_rounded)
+     * 
+     * # Get the indices of the non-white pixels, subtract one, and store as "x y" strings.
+     * land = map(p -> string((p[2]-1)," ",(p[1]-1)), findall(x -> x != Gray{N0f8}(1.0), bw_rounded))
+     * 
+     * # Output the CSV as text
+     * out = open("earth.txt","w")
+     * foreach(line -> println(out, line), land)
+     * close(out)
+     * }
+     * </pre>
+     */
+    private final Set<Integer> earth[] = new Set[3];
+   
+    /**
+     * This is a useless "feature" that I wanted to leave in for fun.
+     * To add a map of the earth I scraped an "equirectangular" map from 
+     * Wikipedia. I knew the map wasn't grayscale, so I used a quick Julia
+     * program to coerce grayscale. To my disappointment, either Julia or 
+     * Gimp interpolated gray colors anyways, so I ended up with a map of the
+     * earth with either too much land or too much water. You can press the
+     * numbers 1, 2, and 3 on the keyboard to select which map you want.
+     * 1 has too much land, 2 has too much water, and 3 is "just right" where
+     * I rounded the grayscale pixels back to what they were supposed to be.
+     */
+    protected static int EARTH = 2;
     
     int xoffset = 0;
     int yoffset = 0;
@@ -119,6 +171,38 @@ public final class ConnectionMap {
             }
         });
         parseThread.setDaemon(true);
+        
+        earth[0] = readMap("/resources/earth1.txt");
+        earth[1] = readMap("/resources/earth2.txt");
+        earth[2] = readMap("/resources/earth3.txt");
+    }
+    
+    /**
+     * Read a list of space-separated (x,y) coordinates from the earth.txt file
+     * included as a project resource. Each (x,y) coordinate pair is composed into
+     * a single integer. The 16 most significant bits represent x and the 16
+     * least significant bits represent y. Thus, a different input file can be
+     * used for resolutions up to 65536x65536 (!!!) without any code changes.
+     * 
+     * It is expected that the (x,y) coordinates are presented in the same domain
+     * that this program renders output. Each pixel is considered "land", and each
+     * pixel not presented is not considered land. Thus, the GUI needs only iterate
+     * over all coordinates presented and color the corresponding pixel green.
+     * 
+     * @return an immutable set of integers that are the composition of (x,y)
+     * coordinates in the GUI's pixel space representing land.
+     */
+    private Set<Integer> readMap(String resource) {
+        final Set<Integer> e = new HashSet<>();
+        
+        Scanner sc = new Scanner(getClass().getResourceAsStream(resource));
+        while (sc.hasNextInt()) {
+            final int x = sc.nextInt();
+            final int y = sc.nextInt();
+            e.add((x << 16) | y);
+        }
+        
+        return Collections.unmodifiableSet(e);
     }
     
     private double[] getLocation(String address) throws GeoIp2Exception {
@@ -147,6 +231,16 @@ public final class ConnectionMap {
     
     public BufferedImage renderImage() {
         final BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+                
+        earth[EARTH].forEach(pixel -> {
+            final int x = pixel >> 16;
+            final int y = pixel & 0x0000ffff;
+            
+            // I was surprised to learn that the alpha channel actually comes first.
+            // The bytes of the integer are AA|RR|GG|BB.
+            image.setRGB((x + xoffset) % WIDTH, (y + yoffset) % HEIGHT, 0xff00ff00);
+        });
+        
         if (!map.isEmpty()) {
             // yeah I hate it too, but we need to normalize values relative to each other.
             // int max = Collections.max(map.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getValue();
@@ -154,11 +248,12 @@ public final class ConnectionMap {
             map.forEach((location, intensity) -> {               
                 // The heat map idea didn't work as well as I had hoped. For now,
                 // this is just a simple white/black map of pixels.
-                int x = location.getKey();
-                int y = ConnectionMap.HEIGHT - location.getValue();
+                final int x = location.getKey();
+                final int y = ConnectionMap.HEIGHT - location.getValue();
                 image.setRGB((x + xoffset) % WIDTH, (y + yoffset) % HEIGHT, 0xffffffff);
             });
         }
+        
         return image;
     }
 }

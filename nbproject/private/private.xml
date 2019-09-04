@@ -2,6 +2,12 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/wjhol/Documents/NetBeansProjects/Connection%20Map/src/com/wjholden/tcpmonitor/SyslogListener.java</file>
+            <file>file:/C:/Users/wjhol/Documents/NetBeansProjects/Connection%20Map/src/com/wjholden/tcpmonitor/ConnectionMapPanel.java</file>
+            <file>file:/C:/Users/wjhol/Documents/NetBeansProjects/Connection%20Map/src/com/wjholden/tcpmonitor/MulticastSyslogListener.java</file>
+            <file>file:/C:/Users/wjhol/Documents/NetBeansProjects/Connection%20Map/src/com/wjholden/tcpmonitor/ConnectionMapFrame.java</file>
+            <file>file:/C:/Users/wjhol/Documents/NetBeansProjects/Connection%20Map/src/com/wjholden/tcpmonitor/ConnectionMap.java</file>
+        </group>
     </open-files>
 </project-private>

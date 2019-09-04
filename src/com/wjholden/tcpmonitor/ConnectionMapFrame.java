@@ -50,6 +50,7 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
         f.setVisible(true);
         f.addKeyListener(f);
         f.timer.start();
+        f.setTitle("Connection Map");
     }
     
     public static void main(String args[]) {
@@ -64,6 +65,15 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
                 break;
             case 'f':
                 setFullscreen();
+                break;
+            case '1':
+                ConnectionMap.EARTH = 0;
+                break;
+            case '2':
+                ConnectionMap.EARTH = 1;
+                break;
+            case '3':
+                ConnectionMap.EARTH = 2;
                 break;
         }
     }
