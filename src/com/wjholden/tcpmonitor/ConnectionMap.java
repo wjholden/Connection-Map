@@ -10,9 +10,11 @@ import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
@@ -83,7 +85,7 @@ public final class ConnectionMap {
      * }
      * </pre>
      */
-    private final Set<Integer> earth[] = new Set[3];
+    private final List<List<Integer>> earth = new ArrayList<>();
    
     /**
      * This is a useless "feature" that I wanted to leave in for fun.
@@ -101,11 +103,11 @@ public final class ConnectionMap {
     int xoffset = 0;
     int yoffset = 0;
     
-    // The magic numbers +20 and -1 are to correct a data problem where
+    // The magic numbers +20 and +1 are to correct a data problem. The
     // pixels of the map are not correctly aligned with true lines of
     // latitude and longitude. Change these constants if using a different map.
     static int mapxoffset = 20;
-    static int mapyoffset = -1;
+    static int mapyoffset = 1;
     
     public void start() {
         syslogMulticastThread.start();
@@ -179,9 +181,9 @@ public final class ConnectionMap {
         });
         parseThread.setDaemon(true);
         
-        earth[0] = readMap("/resources/earth1.txt");
-        earth[1] = readMap("/resources/earth2.txt");
-        earth[2] = readMap("/resources/earth3.txt");
+        earth.add(readMap("/resources/earth1.txt"));
+        earth.add(readMap("/resources/earth2.txt"));
+        earth.add(readMap("/resources/earth3.txt"));
     }
     
     /**
@@ -199,8 +201,8 @@ public final class ConnectionMap {
      * @return an immutable set of integers that are the composition of (x,y)
      * coordinates in the GUI's pixel space representing land.
      */
-    private Set<Integer> readMap(String resource) {
-        final Set<Integer> e = new HashSet<>();
+    private List<Integer> readMap(String resource) {
+        final List<Integer> e = new ArrayList<>();
         
         Scanner sc = new Scanner(getClass().getResourceAsStream(resource));
         while (sc.hasNextInt()) {
@@ -209,7 +211,7 @@ public final class ConnectionMap {
             e.add((x << 16) | y);
         }
         
-        return Collections.unmodifiableSet(e);
+        return Collections.unmodifiableList(e);
     }
     
     private double[] getLocation(String address) throws GeoIp2Exception {
@@ -239,7 +241,7 @@ public final class ConnectionMap {
     public BufferedImage renderImage() {
         final BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
                 
-        earth[EARTH].forEach(pixel -> {
+        earth.get(EARTH).forEach(pixel -> {
             final int x = pixel >> 16;
             final int y = pixel & 0x0000ffff;
             

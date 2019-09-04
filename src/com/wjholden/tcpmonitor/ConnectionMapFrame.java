@@ -17,22 +17,42 @@ import javax.swing.Timer;
 
 public final class ConnectionMapFrame extends JFrame implements KeyListener {
     
+    private static final int TIMER_DELAY_MILLISECONDS = 1000;
     private ConnectionMapPanel panel;
     private final Timer timer;
     
+    /**
+     * First there was an unpleasant snap after the initial timer delay.
+     * Now there is a weird artifact at the bottom of the screen when maximized.
+     * There is some misalignment in the padding between the JFrame and JPanel.
+     */
+    private static final int PADDING = 10;
+    
+    private final static String HELP
+            = "a: show about\n"
+            + "f: toggle fullscreen\n"
+            + "h: show this help\n"
+            + "q: quit\n"
+            + "\u2191\u2193\u2190\u2192: pan everything\n"
+            + "wasd: pan map only\n"
+            + "1-3: select map\n"
+            + "g: darken green\n"
+            + "G: brighten green";
+    
     public ConnectionMapFrame() {
         setLayout(new FlowLayout());
-        timer = new javax.swing.Timer(1000, this::updateScreen);
+        timer = new javax.swing.Timer(TIMER_DELAY_MILLISECONDS, this::updateScreen);
         
         addComponentListener(new ComponentAdapter() {
            @Override
            public void componentResized(ComponentEvent e) {
-               panel.setFrameSize(getWidth(), getHeight());
+               panel.setFrameSize(getContentPane().getWidth() - PADDING, getContentPane().getHeight() - PADDING);
+               panel.repaint();
            }
         });
         
         addWindowStateListener((WindowEvent e) -> {
-            panel.setFrameSize(getWidth(), getHeight());
+            panel.setFrameSize(getWidth() - PADDING, getHeight() - PADDING);
             panel.repaint();
         });
     }
@@ -98,6 +118,10 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
                 break;
             case 'd':
                 ConnectionMap.mapOffsetX(+1);
+                break;
+            case 'h':
+                JOptionPane.showMessageDialog(this, HELP, "Help", JOptionPane.QUESTION_MESSAGE);
+                break;
         }
     }
 

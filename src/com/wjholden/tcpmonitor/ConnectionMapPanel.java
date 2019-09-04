@@ -19,7 +19,6 @@ public final class ConnectionMapPanel extends JPanel {
         fireguard = new ConnectionMap();
         fireguard.start();
         transform = new AffineTransform();
-        
     }
 
     @Override
