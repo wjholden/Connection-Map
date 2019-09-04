@@ -7,6 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.swing.JFrame;
@@ -28,6 +29,11 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
            public void componentResized(ComponentEvent e) {
                panel.setFrameSize(getWidth(), getHeight());
            }
+        });
+        
+        addWindowStateListener((WindowEvent e) -> {
+            panel.setFrameSize(getWidth(), getHeight());
+            panel.repaint();
         });
     }
     
@@ -74,6 +80,12 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
                 break;
             case '3':
                 ConnectionMap.EARTH = 2;
+                break;
+            case 'g':
+                ConnectionMap.lessGreen();
+                break;
+            case 'G':
+                ConnectionMap.moreGreen();
                 break;
         }
     }

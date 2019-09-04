@@ -41,6 +41,7 @@ public final class ConnectionMap {
     private static final Pattern CLOSE_PATTERN = Pattern.compile(CLOSE);
     protected static final int WIDTH = 360 * 2;
     protected static final int HEIGHT = 180 * 2;
+    private static int GREEN = 0xff006000;
 
     private final Object lock = new Object();
     private final Queue<String> queue = new LinkedList<>();
@@ -238,7 +239,11 @@ public final class ConnectionMap {
             
             // I was surprised to learn that the alpha channel actually comes first.
             // The bytes of the integer are AA|RR|GG|BB.
-            image.setRGB((x + xoffset) % WIDTH, (y + yoffset) % HEIGHT, 0xff00ff00);
+            //
+            // The magic numbers +20 and -1 are to correct a data problem where
+            // pixels of the map are not correctly aligned with true lines of
+            // latitude and longitude. Remove these constants if using a different map.
+            image.setRGB((x + xoffset + 20) % WIDTH, (y + yoffset - 1) % HEIGHT, ConnectionMap.GREEN);
         });
         
         if (!map.isEmpty()) {
@@ -255,5 +260,21 @@ public final class ConnectionMap {
         }
         
         return image;
+    }
+    
+    protected static void moreGreen() {
+        int g = (GREEN & 0x0000ff00) >>> 8;
+        if (g < 0xff) {
+            GREEN = 0xff000000 | ((g + 1) << 8);
+            System.out.println(Integer.toString(g + 1, 16));
+        }
+    }
+    
+    protected static void lessGreen() {
+        int g = (GREEN & 0x0000ff00) >>> 8;
+        if (g > 0) {
+            GREEN = 0xff000000 | ((g - 1) << 8);
+            System.out.println(Integer.toString(g - 1, 16));
+        }
     }
 }
