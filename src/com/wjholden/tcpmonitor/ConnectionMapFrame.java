@@ -87,6 +87,17 @@ public final class ConnectionMapFrame extends JFrame implements KeyListener {
             case 'G':
                 ConnectionMap.moreGreen();
                 break;
+            case 'w':
+                ConnectionMap.mapOffsetY(-1);
+                break;
+            case 's':
+                ConnectionMap.mapOffsetY(+1);
+                break;
+            case 'a':
+                ConnectionMap.mapOffsetX(-1);
+                break;
+            case 'd':
+                ConnectionMap.mapOffsetX(+1);
         }
     }
 

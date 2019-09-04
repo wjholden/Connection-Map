@@ -101,6 +101,12 @@ public final class ConnectionMap {
     int xoffset = 0;
     int yoffset = 0;
     
+    // The magic numbers +20 and -1 are to correct a data problem where
+    // pixels of the map are not correctly aligned with true lines of
+    // latitude and longitude. Change these constants if using a different map.
+    static int mapxoffset = 20;
+    static int mapyoffset = -1;
+    
     public void start() {
         syslogMulticastThread.start();
         //syslogUnicastThread.start();
@@ -239,11 +245,7 @@ public final class ConnectionMap {
             
             // I was surprised to learn that the alpha channel actually comes first.
             // The bytes of the integer are AA|RR|GG|BB.
-            //
-            // The magic numbers +20 and -1 are to correct a data problem where
-            // pixels of the map are not correctly aligned with true lines of
-            // latitude and longitude. Remove these constants if using a different map.
-            image.setRGB((x + xoffset + 20) % WIDTH, (y + yoffset - 1) % HEIGHT, ConnectionMap.GREEN);
+            image.setRGB((x + xoffset + mapxoffset) % WIDTH, (y + yoffset - mapyoffset) % HEIGHT, ConnectionMap.GREEN);
         });
         
         if (!map.isEmpty()) {
@@ -266,15 +268,21 @@ public final class ConnectionMap {
         int g = (GREEN & 0x0000ff00) >>> 8;
         if (g < 0xff) {
             GREEN = 0xff000000 | ((g + 1) << 8);
-            System.out.println(Integer.toString(g + 1, 16));
-        }
+        }        
     }
     
     protected static void lessGreen() {
         int g = (GREEN & 0x0000ff00) >>> 8;
         if (g > 0) {
             GREEN = 0xff000000 | ((g - 1) << 8);
-            System.out.println(Integer.toString(g - 1, 16));
         }
+    }
+    
+    protected static void mapOffsetX(int dx) {
+        mapxoffset += dx;
+    }
+    
+    protected static void mapOffsetY(int dy) {
+        mapyoffset += dy;
     }
 }
