@@ -12,13 +12,11 @@ import java.net.UnknownHostException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,8 +35,8 @@ public final class ConnectionMap {
     // %ASA-6-302014: Teardown TCP connection
     // %ASA-6-302015: Built {inbound|outbound} UDP connection
     // %ASA-6-302016: Teardown UDP connection
-    private static final String OPEN = ".*302013.+outside:(.+?)/.*";
-    private static final String CLOSE = ".*302014.+outside:(.+?)/.*";
+    private static final String OPEN = ".*30201[35].+outside:(.+?)/.*";
+    private static final String CLOSE = ".*30201[46].+outside:(.+?)/.*";
     private static final Pattern OPEN_PATTERN = Pattern.compile(OPEN);
     private static final Pattern CLOSE_PATTERN = Pattern.compile(CLOSE);
     protected static final int WIDTH = 360 * 2;
